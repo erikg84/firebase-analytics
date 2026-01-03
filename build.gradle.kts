@@ -1,7 +1,18 @@
-plugins {
-    alias(libs.plugins.kotlin.multiplatform) apply false
-    alias(libs.plugins.android.library) apply false
-    alias(libs.plugins.ksp) apply false
+buildscript {
+    repositories {
+        mavenCentral()
+        gradlePluginPortal()
+    }
+    dependencies {
+        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:2.2.0")
+    }
+}
+
+allprojects {
+    repositories {
+        mavenCentral()
+        gradlePluginPortal()
+    }
 }
 
 tasks.register("clean", Delete::class) {

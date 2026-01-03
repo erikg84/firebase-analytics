@@ -1,4 +1,4 @@
-package com.dallaslabs.sdk.analytics
+package com.dallaslabs.firebase.analytics
 
 import org.koin.core.annotation.ComponentScan
 import org.koin.core.annotation.Module
@@ -8,5 +8,5 @@ import org.koin.core.annotation.Module
  * Use @ComponentScan to automatically discover and register components.
  */
 @Module
-@ComponentScan("com.dallaslabs.sdk.analytics")
-public class AnalyticsModule
+@ComponentScan("com.dallaslabs.firebase.analytics")
+public class FirebaseAnalyticsModule

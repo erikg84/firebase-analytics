@@ -1,7 +1,8 @@
 plugins {
-    alias(libs.plugins.kotlin.multiplatform)
-    alias(libs.plugins.android.library)
-    alias(libs.plugins.ksp)
+    kotlin("multiplatform")
+    id("com.android.library")
+    id("org.jetbrains.compose")
+    id("com.google.devtools.ksp")
     id("maven-publish")
 }
 
@@ -37,6 +38,7 @@ kotlin {
                 api(libs.gitlive.firebase.analytics)
                 api(libs.koin.core)
                 implementation(libs.koin.annotations)
+                implementation(libs.compose.runtime)
             }
         }
         
@@ -65,11 +67,12 @@ kotlin {
 }
 
 android {
-    namespace = "com.dallaslabs.sdk.analytics"
+    namespace = "com.dallaslabs.firebase.analytics"
     compileSdk = 35
     
     defaultConfig {
         minSdk = 24
+        consumerProguardFiles("proguard-rules.pro")
     }
     
     compileOptions {
