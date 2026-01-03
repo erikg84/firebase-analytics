@@ -83,7 +83,7 @@ publishing {
             groupId = "com.dallaslabs.sdk"
             artifactId = when (name) {
                 "kotlinMultiplatform" -> "firebase-analytics"
-                else -> "firebase-analytics-$name"
+                else -> "firebase-analytics-${name.lowercase()}"
             }
 
             pom {
