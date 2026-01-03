@@ -17,7 +17,7 @@ kotlin {
         compilerOptions {
             jvmTarget.set(JvmTarget.JVM_11)
         }
-        publishLibraryVariants("release", "debug")
+        publishLibraryVariants("release")
     }
 
     listOf(
@@ -89,7 +89,7 @@ publishing {
             pom {
                 name.set("Firebase Analytics SDK")
                 description.set("Kotlin Multiplatform Firebase Analytics SDK for Android and iOS")
-                url.set("https://github.com/erikg84/firebase-analytics-kmp")
+                url.set("https://github.com/erikg84/firebase-analytics")
 
                 licenses {
                     license {
@@ -106,9 +106,9 @@ publishing {
                 }
 
                 scm {
-                    connection.set("scm:git:git://github.com/erikg84/firebase-analytics-kmp.git")
-                    developerConnection.set("scm:git:ssh://github.com/erikg84/firebase-analytics-kmp.git")
-                    url.set("https://github.com/erikg84/firebase-analytics-kmp")
+                    connection.set("scm:git:git://github.com/erikg84/firebase-analytics.git")
+                    developerConnection.set("scm:git:ssh://github.com/erikg84/firebase-analytics.git")
+                    url.set("https://github.com/erikg84/firebase-analytics")
                 }
             }
         }
@@ -117,7 +117,7 @@ publishing {
     repositories {
         maven {
             name = "GitHubPackages"
-            url = uri("https://maven.pkg.github.com/erikg84/firebase-analytics-kmp")
+            url = uri("https://maven.pkg.github.com/erikg84/firebase-analytics")
             credentials {
                 username = System.getenv("GITHUB_ACTOR") ?: findProperty("gpr.user")?.toString()
                 password = System.getenv("GITHUB_TOKEN") ?: findProperty("gpr.token")?.toString()
