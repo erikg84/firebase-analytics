@@ -1,67 +1,43 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
 plugins {
-    kotlin("multiplatform")
-    id("com.android.library")
-    id("org.jetbrains.compose")
-    id("com.google.devtools.ksp")
+    alias(libs.plugins.kotlin.multiplatform)
+    alias(libs.plugins.android.library)
+    alias(libs.plugins.ksp)
     id("maven-publish")
 }
 
 group = "com.dallaslabs.sdk"
-version = "1.0.0"
+version = findProperty("version")?.toString()?.takeIf { it != "unspecified" } ?: "1.0.0"
 
 kotlin {
     explicitApi()
-    
+
     androidTarget {
-        publishLibraryVariants("release", "debug")
-        compilations.all {
-            kotlinOptions {
-                jvmTarget = "11"
-            }
+        compilerOptions {
+            jvmTarget.set(JvmTarget.JVM_11)
         }
+        publishLibraryVariants("release", "debug")
     }
-    
+
     listOf(
         iosX64(),
         iosArm64(),
         iosSimulatorArm64()
-    ).forEach {
-        it.binaries.framework {
-            baseName = "FirebaseAnalytics"
+    ).forEach { iosTarget ->
+        iosTarget.binaries.framework {
+            baseName = "FirebaseAnalyticsSDK"
             isStatic = true
         }
     }
 
+    applyDefaultHierarchyTemplate()
+
     sourceSets {
-        val commonMain by getting {
-            dependencies {
-                api(libs.gitlive.firebase.analytics)
-                api(libs.koin.core)
-                implementation(libs.koin.annotations)
-                implementation(libs.compose.runtime)
-            }
-        }
-        
-        val androidMain by getting {
-            dependencies {
-                implementation(libs.koin.android)
-            }
-        }
-        
-        val iosMain by creating {
-            dependsOn(commonMain)
-        }
-        
-        val iosX64Main by getting {
-            dependsOn(iosMain)
-        }
-        
-        val iosArm64Main by getting {
-            dependsOn(iosMain)
-        }
-        
-        val iosSimulatorArm64Main by getting {
-            dependsOn(iosMain)
+        commonMain.dependencies {
+            api(libs.gitlive.firebase.analytics)
+            api(libs.koin.core)
+            api(libs.koin.annotations)
         }
     }
 }
@@ -69,17 +45,17 @@ kotlin {
 android {
     namespace = "com.dallaslabs.firebase.analytics"
     compileSdk = 35
-    
+
     defaultConfig {
         minSdk = 24
         consumerProguardFiles("proguard-rules.pro")
     }
-    
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
-    
+
     publishing {
         singleVariant("release") {
             withSourcesJar()
@@ -96,44 +72,55 @@ dependencies {
     add("kspIosSimulatorArm64", libs.koin.ksp.compiler)
 }
 
+ksp {
+    arg("KOIN_CONFIG_CHECK", "true")
+    arg("KOIN_DEFAULT_MODULE", "false")
+}
+
 publishing {
     publications {
         withType<MavenPublication> {
+            groupId = "com.dallaslabs.sdk"
+            artifactId = when (name) {
+                "kotlinMultiplatform" -> "firebase-analytics"
+                else -> "firebase-analytics-$name"
+            }
+
             pom {
                 name.set("Firebase Analytics SDK")
-                description.set("Kotlin Multiplatform Firebase Analytics SDK")
-                url.set("https://github.com/erikg84/firebase-analytics")
-                
+                description.set("Kotlin Multiplatform Firebase Analytics SDK for Android and iOS")
+                url.set("https://github.com/erikg84/firebase-analytics-kmp")
+
                 licenses {
                     license {
-                        name.set("The Apache License, Version 2.0")
-                        url.set("http://www.apache.org/licenses/LICENSE-2.0.txt")
+                        name.set("MIT License")
+                        url.set("https://opensource.org/licenses/MIT")
                     }
                 }
-                
+
                 developers {
                     developer {
                         id.set("erikg84")
                         name.set("Erik G")
                     }
                 }
-                
+
                 scm {
-                    connection.set("scm:git:git://github.com/erikg84/firebase-analytics.git")
-                    developerConnection.set("scm:git:ssh://github.com/erikg84/firebase-analytics.git")
-                    url.set("https://github.com/erikg84/firebase-analytics")
+                    connection.set("scm:git:git://github.com/erikg84/firebase-analytics-kmp.git")
+                    developerConnection.set("scm:git:ssh://github.com/erikg84/firebase-analytics-kmp.git")
+                    url.set("https://github.com/erikg84/firebase-analytics-kmp")
                 }
             }
         }
     }
-    
+
     repositories {
         maven {
             name = "GitHubPackages"
-            url = uri("https://maven.pkg.github.com/erikg84/firebase-analytics")
+            url = uri("https://maven.pkg.github.com/erikg84/firebase-analytics-kmp")
             credentials {
-                username = System.getenv("GITHUB_ACTOR")
-                password = System.getenv("GITHUB_TOKEN")
+                username = System.getenv("GITHUB_ACTOR") ?: findProperty("gpr.user")?.toString()
+                password = System.getenv("GITHUB_TOKEN") ?: findProperty("gpr.token")?.toString()
             }
         }
     }
