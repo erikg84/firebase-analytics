@@ -1,17 +1,35 @@
-# Firebase Analytics SDK for Kotlin Multiplatform
+# Firebase SDK Collection for Kotlin Multiplatform
 
-A Kotlin Multiplatform (KMP) Firebase Analytics SDK for Android and iOS, built with Koin dependency injection and GitLive Firebase.
+A collection of Kotlin Multiplatform (KMP) Firebase SDKs for Android and iOS, built with Koin dependency injection.
 
-## Features
+## Available SDKs
 
-- 🔥 Firebase Analytics integration using GitLive Firebase KMP
-- 💉 Dependency injection with Koin 4.1.1 and KSP annotations
-- 📱 Support for Android (minSdk 24) and iOS (arm64, simulator)
-- 🎯 Type-safe analytics tracking with sealed interfaces
-- 🚀 Built with Kotlin 2.2 and Compose Multiplatform 1.9
-- 📦 Published to GitHub Packages
+### 📊 firebase-analytics
+Firebase Analytics integration using GitLive Firebase KMP
 
-## Installation
+**Features:**
+- Type-safe analytics tracking with sealed interfaces
+- Screen view and CTA tracking
+- User properties and custom events
+- No-op implementation for testing
+
+[View firebase-analytics documentation →](firebase-analytics/README.md)
+
+### 🔔 firebase-notifications
+Firebase Notifications SDK using KMPNotifier
+
+**Features:**
+- Unified notification API for Android and iOS
+- Built-in permission handling
+- Local notification support
+- Firebase Cloud Messaging (FCM) integration
+- Push token management
+
+[View firebase-notifications documentation →](firebase-notifications/README.md)
+
+## Quick Start
+
+### Installation
 
 Add the GitHub Packages repository to your `settings.gradle.kts`:
 
@@ -31,171 +49,197 @@ dependencyResolutionManagement {
 }
 ```
 
-Add the dependency to your module's `build.gradle.kts`:
+### Add Dependencies
 
 ```kotlin
 commonMain {
     dependencies {
+        // Firebase Analytics
         implementation("com.dallaslabs.sdk:firebase-analytics:1.0.0")
+
+        // Firebase Notifications
+        implementation("com.dallaslabs.sdk:firebase-notifications:1.0.0")
     }
 }
 ```
 
-## Setup
-
-### Initialize Koin Module
-
-In your application initialization:
+### Initialize Koin Modules
 
 ```kotlin
 import com.dallaslabs.firebase.analytics.FirebaseAnalyticsModule
+import com.dallaslabs.firebase.notifications.FirebaseNotificationsModule
 import org.koin.core.context.startKoin
 import org.koin.ksp.generated.module
 
 fun initializeKoin() {
     startKoin {
-        modules(FirebaseAnalyticsModule().module)
+        modules(
+            FirebaseAnalyticsModule().module,
+            FirebaseNotificationsModule().module
+        )
     }
 }
 ```
 
-### Inject AnalyticsManager
+### Usage Example
 
 ```kotlin
-import com.dallaslabs.firebase.analytics.AnalyticsManager
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
+@Composable
+fun MyApp() {
+    val analytics: AnalyticsTracker = koinInject()
+    val notifications: NotificationManager = koinInject()
 
-class MyViewModel : KoinComponent {
-    private val analytics: AnalyticsManager by inject()
-    
-    suspend fun trackUserAction() {
-        analytics.trackEvent("user_action", mapOf("action" to "button_click"))
+    LaunchedEffect(Unit) {
+        // Initialize notifications
+        notifications.initialize()
+
+        // Request permission
+        val granted = notifications.requestPermission()
+        if (granted) {
+            // Track analytics event
+            analytics.trackScreen("home", "HomeScreen")
+
+            // Send test notification
+            notifications.sendLocalNotification(
+                title = "Welcome!",
+                body = "App notifications are enabled"
+            )
+        }
     }
 }
 ```
 
-## Usage
-
-### Set User ID
-
-```kotlin
-analytics.setUserId("user123")
-```
-
-### Set User Property
-
-```kotlin
-analytics.setUserProperty("user_type", "premium")
-```
-
-### Track Screen View
-
-```kotlin
-// Using predefined screens
-analytics.trackScreenView(AnalyticsScreen.Home.name, AnalyticsScreen.Home.screenClass)
-
-// Or use the screen object directly with trackCtaClick
-```
-
-### Track Custom Event
-
-```kotlin
-analytics.trackEvent("purchase", mapOf(
-    "item_id" to "SKU123",
-    "price" to 19.99,
-    "currency" to "USD"
-))
-```
-
-### Track CTA Click
-
-```kotlin
-import com.dallaslabs.firebase.analytics.AnalyticsScreen
-import com.dallaslabs.firebase.analytics.AnalyticsCta
-
-analytics.trackCtaClick(
-    cta = AnalyticsCta.SignIn,
-    screen = AnalyticsScreen.Auth
-)
-```
-
-## Predefined Screens
-
-The SDK provides common screen types:
-
-- `AnalyticsScreen.Home`
-- `AnalyticsScreen.Auth`
-- `AnalyticsScreen.Settings`
-- `AnalyticsScreen.Profile`
-- `AnalyticsScreen.Custom(name, screenClass, parameters)`
-
-## Predefined CTAs
-
-The SDK provides common CTA types:
-
-- `AnalyticsCta.SignIn`
-- `AnalyticsCta.SignUp`
-- `AnalyticsCta.Submit`
-- `AnalyticsCta.Cancel`
-- `AnalyticsCta.Custom(name, parameters)`
-
-## Testing
-
-Use `NoOpAnalyticsManager` for testing or when analytics is disabled:
-
-```kotlin
-import com.dallaslabs.firebase.analytics.NoOpAnalyticsManager
-
-val testAnalytics = NoOpAnalyticsManager()
-// All methods are no-ops
-```
-
-## Architecture
-
-The SDK follows clean architecture principles:
+## Repository Structure
 
 ```
-com.dallaslabs.firebase.analytics
-├── AnalyticsManager (interface)
-├── FirebaseAnalyticsManager (Firebase implementation)
-├── NoOpAnalyticsManager (No-op implementation)
-├── AnalyticsScreen (sealed interface)
-├── AnalyticsCta (sealed interface)
-└── FirebaseAnalyticsModule (Koin module)
+firebase-sdk/
+├── firebase-analytics/          # Analytics SDK
+│   ├── src/commonMain/
+│   ├── build.gradle.kts
+│   ├── proguard-rules.pro
+│   └── README.md
+├── firebase-notifications/      # Notifications SDK
+│   ├── src/commonMain/
+│   ├── build.gradle.kts
+│   ├── proguard-rules.pro
+│   └── README.md
+├── gradle/
+│   └── libs.versions.toml       # Version catalog
+├── .github/workflows/
+│   └── publish.yml              # GitHub Actions publishing
+├── build.gradle.kts
+├── settings.gradle.kts
+└── README.md                    # This file
 ```
+
+## Common Features
+
+All SDKs in this collection share:
+
+- ✅ **Kotlin 2.2.20** - Latest Kotlin Multiplatform
+- ✅ **Koin 4.1.1** - Dependency injection with KSP annotations
+- ✅ **Android (minSdk 24)** - Wide device compatibility
+- ✅ **iOS (arm64, simulator)** - Full iOS support
+- ✅ **Explicit API Mode** - Type-safe, well-documented APIs
+- ✅ **GitHub Packages** - Automated publishing
+- ✅ **ProGuard Rules** - Optimized for release builds
 
 ## Requirements
 
-- Kotlin 2.2.0
+- Kotlin 2.2.20
 - Android minSdk 24
 - iOS 12+
-- Gradle 8.11
+- Gradle 8.5+
+- JDK 11+
 
-## Dependencies
+## Development
 
-- GitLive Firebase Analytics: 2.4.0
-- Koin Core: 4.1.1
-- Koin Annotations: 2.0.0
-- Compose Multiplatform Runtime: 1.9.0
+### Local Testing
 
-## ProGuard
+Publish to Maven Local for testing:
 
-ProGuard rules are included automatically. If you need to add custom rules, they are located in `proguard-rules.pro`.
+```bash
+# Publish all modules
+./gradlew publishToMavenLocal
+
+# Publish specific module
+./gradlew :firebase-analytics:publishToMavenLocal
+./gradlew :firebase-notifications:publishToMavenLocal
+```
+
+Then use in your app:
+
+```kotlin
+repositories {
+    mavenLocal()
+}
+```
+
+### Building
+
+```bash
+# Build all modules
+./gradlew build
+
+# Build specific module
+./gradlew :firebase-analytics:build
+./gradlew :firebase-notifications:build
+```
 
 ## Publishing
 
-The library is automatically published to GitHub Packages when a release tag is created:
+The SDKs are automatically published to GitHub Packages when a release tag is created:
 
 ```bash
+# Create and push a version tag
 git tag -a v1.0.0 -m "Release version 1.0.0"
 git push origin v1.0.0
 ```
 
-## License
+GitHub Actions will automatically:
+1. Build all modules
+2. Run tests
+3. Publish to GitHub Packages
 
-Apache License 2.0
+## Version Catalog
+
+Dependencies are managed centrally in `gradle/libs.versions.toml`:
+
+```toml
+[versions]
+kotlin = "2.2.20"
+koin = "4.1.1"
+kmpnotifier = "1.6.1"
+
+[libraries]
+koin-core = { module = "io.insert-koin:koin-core", version.ref = "koin" }
+kmpnotifier = { module = "io.github.mirzemehdi:kmpnotifier", version.ref = "kmpnotifier" }
+```
 
 ## Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+Contributions are welcome! Please:
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Make your changes
+4. Run tests (`./gradlew test`)
+5. Commit your changes (`git commit -m 'Add amazing feature'`)
+6. Push to the branch (`git push origin feature/amazing-feature`)
+7. Open a Pull Request
+
+## License
+
+MIT License
+
+## Links
+
+- [GitHub Repository](https://github.com/erikg84/firebase-analytics)
+- [Firebase Documentation](https://firebase.google.com/docs)
+- [Kotlin Multiplatform](https://kotlinlang.org/docs/multiplatform.html)
+- [Koin Documentation](https://insert-koin.io/)
+
+---
+
+**Maintained by:** Erik G (@erikg84)
+**Last Updated:** January 22, 2026

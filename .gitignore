@@ -57,6 +57,7 @@ Pods/
 *.kotlin_module
 *.kt.swp
 *.kt~
+.kotlin/
 
 # KSP
 generated/

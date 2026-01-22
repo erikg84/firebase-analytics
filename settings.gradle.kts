@@ -21,5 +21,6 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "firebase-analytics-root"
+rootProject.name = "firebase-sdk"
 include(":firebase-analytics")
+include(":firebase-notifications")
