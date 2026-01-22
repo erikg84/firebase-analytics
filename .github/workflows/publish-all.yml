@@ -1,11 +1,11 @@
-name: Publish to GitHub Packages
+name: Publish All SDKs to GitHub Packages
 
 on:
-  release:
-    types: [created]
   push:
     tags:
       - 'v*'
+      - '!analytics-v*'
+      - '!notifications-v*'
 
 jobs:
   publish:
