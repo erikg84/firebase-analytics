@@ -126,7 +126,9 @@ firebase-sdk/
 ├── gradle/
 │   └── libs.versions.toml       # Version catalog
 ├── .github/workflows/
-│   └── publish.yml              # GitHub Actions publishing
+│   ├── publish-all.yml          # Publish both SDKs (v* tags)
+│   ├── publish-analytics.yml    # Publish analytics only (analytics-v* tags)
+│   └── publish-notifications.yml # Publish notifications only (notifications-v* tags)
 ├── build.gradle.kts
 ├── settings.gradle.kts
 └── README.md                    # This file
@@ -188,18 +190,76 @@ repositories {
 
 ## Publishing
 
-The SDKs are automatically published to GitHub Packages when a release tag is created:
+The SDKs are automatically published to GitHub Packages using GitHub Actions. There are three publishing workflows to support both synchronized and independent releases:
+
+### Option 1: Publish Both SDKs (Synchronized Version)
+
+Use this when both SDKs should share the same version number:
 
 ```bash
-# Create and push a version tag
 git tag -a v1.0.0 -m "Release version 1.0.0"
 git push origin v1.0.0
 ```
 
-GitHub Actions will automatically:
-1. Build all modules
-2. Run tests
-3. Publish to GitHub Packages
+**Workflow:** `publish-all.yml` (triggers on `v*` tags)
+
+**Published artifacts:**
+- `com.dallaslabs.sdk:firebase-analytics:1.0.0`
+- `com.dallaslabs.sdk:firebase-notifications:1.0.0`
+
+---
+
+### Option 2: Publish Only Analytics SDK
+
+Use this to release a new version of the analytics SDK independently:
+
+```bash
+git tag -a analytics-v1.0.1 -m "Analytics SDK v1.0.1"
+git push origin analytics-v1.0.1
+```
+
+**Workflow:** `publish-analytics.yml` (triggers on `analytics-v*` tags)
+
+**Published artifacts:**
+- `com.dallaslabs.sdk:firebase-analytics:1.0.1`
+
+---
+
+### Option 3: Publish Only Notifications SDK
+
+Use this to release a new version of the notifications SDK independently:
+
+```bash
+git tag -a notifications-v1.0.2 -m "Notifications SDK v1.0.2"
+git push origin notifications-v1.0.2
+```
+
+**Workflow:** `publish-notifications.yml` (triggers on `notifications-v*` tags)
+
+**Published artifacts:**
+- `com.dallaslabs.sdk:firebase-notifications:1.0.2`
+
+---
+
+### What Happens During Publishing
+
+All workflows automatically:
+1. Check out the code
+2. Set up JDK 17
+3. Extract version from the tag
+4. Build the SDK(s)
+5. Publish to GitHub Packages at `https://maven.pkg.github.com/erikg84/firebase-analytics`
+
+### Tag Naming Convention
+
+- `v*` → Publishes both SDKs with the same version
+- `analytics-v*` → Publishes only firebase-analytics
+- `notifications-v*` → Publishes only firebase-notifications
+
+**Examples:**
+- `v2.0.0` → analytics:2.0.0 + notifications:2.0.0
+- `analytics-v2.1.0` → analytics:2.1.0 only
+- `notifications-v1.5.3` → notifications:1.5.3 only
 
 ## Version Catalog
 
